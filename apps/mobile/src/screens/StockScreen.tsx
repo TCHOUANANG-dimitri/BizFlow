@@ -1,149 +1,169 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AlertTriangle from 'lucide-react-native/icons/triangle-alert';
-import CheckCircle2 from 'lucide-react-native/icons/circle-check';
-import RotateCcwClock from 'lucide-react-native/icons/rotate-ccw-clock';
 import Package from 'lucide-react-native/icons/package';
+import PackagePlus from 'lucide-react-native/icons/package-plus';
+import RotateCcwClock from 'lucide-react-native/icons/rotate-ccw-clock';
 import X from 'lucide-react-native/icons/x';
 
 import { useApp } from '../context/AppContext';
 import { addStockMovement, getProducts, getStockMovementFeed, ProductRow, StockKind, StockMovementFeedRow } from '../db/repo';
-import { formatTime } from '../format';
+import { createProduct, updateProduct } from '../api/productsApi';
+import { formatFcfa, formatTime } from '../format';
 import { palette, RADIUS, SPACING, typo } from '../theme';
-import { Button, Card, Field, Segmented, Stepper } from '../components/ui';
+import { Badge, Button, Card, Field, Stepper } from '../components/ui';
+import { EmptyText, KpiCard, Notice, ScreenHeader } from '../components/shared';
 
+type ProductDraft = { id: string | null; name: string; purchase_price: string; selling_price: string; minimum_stock: string };
+type Form =
+  | { mode: 'move'; kind: StockKind; product: ProductRow }
+  | { mode: 'product'; draft: ProductDraft };
+
+const emptyDraft = (): ProductDraft => ({ id: null, name: '', purchase_price: '', selling_price: '', minimum_stock: '' });
+
+// Même écran « Stock » que le web : KPI, alerte de seuil, liste avec actions
+// Entrée / Ajuster (tous) et Modifier / Nouveau produit (propriétaire).
 export function StockScreen() {
-  const { refreshKey, refresh } = useApp();
+  const { session, refreshKey, refresh, syncNow } = useApp();
+  const isOwner = session?.role === 'owner';
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [feed, setFeed] = useState<StockMovementFeedRow[]>([]);
-  const [selected, setSelected] = useState<ProductRow | null>(null);
-  const [kind, setKind] = useState<StockKind>('restock');
-  const [qty, setQty] = useState(1);
-  const [reason, setReason] = useState('');
-  const [done, setDone] = useState<string | null>(null);
+  const [form, setForm] = useState<Form | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
 
   useEffect(() => {
     setProducts(getProducts());
     setFeed(getStockMovementFeed(30));
   }, [refreshKey]);
 
-  const submit = () => {
-    if (!selected) return;
-    const delta = kind === 'restock' ? qty : -qty;
-    const row = addStockMovement(selected.id, kind, delta, reason.trim() || null);
+  const low = products.filter((p) => p.quantity <= p.minimum_stock);
+
+  const showFlash = (text: string) => {
+    setFlash(text);
+    setTimeout(() => setFlash(null), 4000);
+  };
+
+  const submitMove = (product: ProductRow, kind: StockKind, qty: number, reason: string | null) => {
+    const row = addStockMovement(product.id, kind, kind === 'restock' ? qty : -qty, reason);
+    setForm(null);
     if (row) {
-      setDone(`${kind === 'restock' ? 'Entrée' : 'Ajustement'} de ${qty} sur ${selected.name}`);
-      setSelected(null);
-      setQty(1);
-      setReason('');
+      showFlash(kind === 'restock' ? `Entrée enregistrée (+${qty})` : `Ajustement enregistré (${-qty})`);
       refresh();
     }
   };
 
-  if (selected) {
+  const submitProduct = async (draft: ProductDraft) => {
+    if (!draft.name.trim()) return;
+    if (draft.id) {
+      await updateProduct(draft.id, {
+        purchase_price: Number(draft.purchase_price) || 0,
+        selling_price: Number(draft.selling_price) || 0,
+        minimum_stock: Number(draft.minimum_stock) || 0,
+      });
+    } else {
+      await createProduct({
+        name: draft.name.trim(),
+        quantity: 0,
+        purchase_price: Number(draft.purchase_price) || 0,
+        selling_price: Number(draft.selling_price) || 0,
+        minimum_stock: Number(draft.minimum_stock) || 0,
+      });
+    }
+    setForm(null);
+    await syncNow();
+    refresh();
+  };
+
+  if (form?.mode === 'move') {
     return (
-      <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <View style={styles.rowBetween}>
-          <Text style={[typo.title, { color: palette.surface, flex: 1 }]}>Stock</Text>
-          <Pressable onPress={() => setSelected(null)} hitSlop={12}>
-            <X size={22} color={palette.surface} />
-          </Pressable>
-        </View>
-
-        <Card>
-          <Text style={[typo.heading, { marginBottom: SPACING.xs }]}>{selected.name}</Text>
-          <Text style={typo.muted}>Quantité actuelle : {selected.quantity} — seuil minimum : {selected.minimum_stock}</Text>
-        </Card>
-
-        <Card>
-          <Text style={[typo.microLabel, { marginBottom: SPACING.sm }]}>Type de mouvement</Text>
-          <Segmented
-            options={[
-              { value: 'restock', label: 'Réappro (entrée)' },
-              { value: 'adjustment', label: 'Ajustement (perte/casse)' },
-            ]}
-            value={kind}
-            onChange={setKind}
-          />
-
-          <View style={styles.divider} />
-
-          <Text style={[typo.microLabel, { marginBottom: SPACING.sm }]}>Quantité</Text>
-          <Stepper value={qty} onChange={setQty} min={1} />
-
-          <View style={styles.divider} />
-
-          <Field
-            label="Motif (optionnel)"
-            placeholder={kind === 'restock' ? 'ex. livraison fournisseur' : 'ex. casse'}
-            value={reason}
-            onChangeText={setReason}
-          />
-
-          <Button title="Enregistrer le mouvement" variant="accent" onPress={submit} />
-        </Card>
-      </ScrollView>
+      <MoveForm
+        key={`${form.product.id}-${form.kind}`}
+        product={form.product}
+        kind={form.kind}
+        onClose={() => setForm(null)}
+        onSubmit={submitMove}
+      />
     );
   }
 
-  const alerts = products.filter((p) => p.quantity <= p.minimum_stock);
+  if (form?.mode === 'product' && isOwner) {
+    return <ProductForm draft={form.draft} onClose={() => setForm(null)} onSubmit={submitProduct} />;
+  }
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={[typo.title, { color: palette.surface }]}>Stock</Text>
-      <Text style={styles.subtitle}>Entrées, ajustements et seuils.</Text>
+      <ScreenHeader
+        title="Stock"
+        subtitle="Entrées, ajustements et alertes de seuil — un mouvement de stock pousse un seul événement."
+      />
 
-      {done && (
-        <View style={styles.successStrip}>
-          <CheckCircle2 size={20} color={palette.success} />
-          <Text style={styles.successText}>{done}</Text>
-        </View>
-      )}
+      <View style={styles.kpiRow}>
+        <KpiCard compact label="Produits" value={String(products.length)} />
+        <KpiCard compact label="Sous le seuil" value={String(low.length)} tone={low.length > 0 ? 'danger' : 'success'} />
+        <KpiCard
+          compact
+          label="Alertes"
+          value={`${products.length > 0 ? ((low.length / products.length) * 100).toFixed(0) : 0}%`}
+          tone="warning"
+        />
+      </View>
 
-      {alerts.length > 0 && (
-        <View style={styles.alertStrip}>
-          <AlertTriangle size={20} color={palette.warning} />
-          <Text style={styles.alertText}>
-            {alerts.length} produit{alerts.length > 1 ? 's' : ''} sous le seuil minimum.
-          </Text>
-        </View>
-      )}
+      {low.length > 0 ? (
+        <Notice tone="warning">
+          {low.length} produit{low.length > 1 ? 's' : ''} sous le seuil minimum — penser à réapprovisionner.
+        </Notice>
+      ) : null}
+      {flash ? <Notice tone="success">{flash}</Notice> : null}
 
       {products.length === 0 ? (
-        <Card>
-          <Text style={typo.body}>
-            Aucun produit connu. Le catalogue se remplit après une connexion réussie (propriété du patron, créé côté web).
-          </Text>
-        </Card>
+        <EmptyText label={isOwner ? 'Aucun produit — ajoute ton premier produit ci-dessous.' : 'Aucun produit connu pour l’instant.'} />
       ) : (
         products.map((p) => {
-          const low = p.quantity <= p.minimum_stock;
+          const isLow = p.quantity <= p.minimum_stock;
           return (
-            <Pressable
-              key={p.id}
-              onPress={() => { setSelected(p); setKind('restock'); setQty(1); setReason(''); setDone(null); }}
-              style={styles.productRow}
-            >
-              <View style={[styles.iconBox, low && { backgroundColor: '#FCEBC8' }]}>
-                <Package size={20} color={low ? palette.warning : palette.primary} />
+            <Card key={p.id} style={{ marginBottom: SPACING.sm }}>
+              <View style={styles.nameRow}>
+                <Text style={[typo.body, { fontWeight: '700', flexShrink: 1 }]} numberOfLines={1}>{p.name}</Text>
+                {isLow ? <Badge label="stock bas" tone="danger" /> : null}
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[typo.body, { fontWeight: '600' }]}>{p.name}</Text>
-                <Text style={typo.muted}>quantité {p.quantity} · seuil {p.minimum_stock}</Text>
+              <Text style={[typo.muted, { marginTop: SPACING.xs }]}>
+                stock <Text style={{ fontWeight: '700', color: palette.text }}>{p.quantity}</Text> · seuil {p.minimum_stock} · vente {formatFcfa(p.selling_price)}
+              </Text>
+              <View style={styles.actions}>
+                <SmallAction icon={<PackagePlus size={16} color={palette.text} />} label="Entrée" onPress={() => setForm({ mode: 'move', kind: 'restock', product: p })} />
+                <SmallAction icon={<Package size={16} color={palette.text} />} label="Ajuster" onPress={() => setForm({ mode: 'move', kind: 'adjustment', product: p })} />
+                {isOwner ? (
+                  <SmallAction
+                    label="Modifier"
+                    onPress={() =>
+                      setForm({
+                        mode: 'product',
+                        draft: {
+                          id: p.id,
+                          name: p.name,
+                          purchase_price: String(p.purchase_price ?? 0),
+                          selling_price: String(p.selling_price),
+                          minimum_stock: String(p.minimum_stock),
+                        },
+                      })
+                    }
+                  />
+                ) : null}
               </View>
-              {low ? (
-                <View style={styles.lowBadge}>
-                  <Text style={styles.lowBadgeText}>À VÉRIFIER</Text>
-                </View>
-              ) : null}
-            </Pressable>
+            </Card>
           );
         })
       )}
 
-      {feed.length > 0 && (
-        <Card style={{ marginTop: SPACING.md }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.sm }}>
+      {isOwner ? (
+        <View style={{ marginTop: SPACING.md }}>
+          <Button title="Nouveau produit" variant="accent" onPress={() => setForm({ mode: 'product', draft: emptyDraft() })} />
+        </View>
+      ) : null}
+
+      {feed.length > 0 ? (
+        <Card style={{ marginTop: SPACING.lg }}>
+          <View style={styles.feedHead}>
             <RotateCcwClock size={18} color={palette.primary} />
             <Text style={typo.microLabel}>Mouvements récents (tous employés)</Text>
           </View>
@@ -166,7 +186,123 @@ export function StockScreen() {
             );
           })}
         </Card>
-      )}
+      ) : null}
+    </ScrollView>
+  );
+}
+
+function SmallAction({ icon, label, onPress }: { icon?: React.ReactNode; label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={styles.smallAction} hitSlop={4}>
+      {icon}
+      <Text style={styles.smallActionText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function MoveForm({
+  product,
+  kind,
+  onClose,
+  onSubmit,
+}: {
+  product: ProductRow;
+  kind: StockKind;
+  onClose: () => void;
+  onSubmit: (product: ProductRow, kind: StockKind, qty: number, reason: string | null) => void;
+}) {
+  const [qty, setQty] = useState(1);
+  const [reason, setReason] = useState('');
+
+  return (
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <View style={styles.formTitleRow}>
+        <Text style={[typo.title, { color: palette.surface, flex: 1, fontSize: 20 }]}>
+          {kind === 'restock' ? 'Entrée de stock' : 'Ajustement'} — {product.name}
+        </Text>
+        <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Fermer">
+          <X size={22} color={palette.surface} />
+        </Pressable>
+      </View>
+
+      <Card>
+        {kind === 'adjustment' ? (
+          <Text style={[typo.muted, { marginBottom: SPACING.md }]}>
+            Quantité négative : sortie/casse. Jamais bloqué, l’écart se réconcilie au sync.
+          </Text>
+        ) : null}
+        <Text style={[typo.microLabel, { marginBottom: SPACING.sm }]}>Quantité</Text>
+        <Stepper value={qty} onChange={setQty} min={1} />
+        <View style={{ height: SPACING.lg }} />
+        <Field
+          label="Motif (optionnel)"
+          placeholder={kind === 'restock' ? 'ex. livraison fournisseur' : 'ex. casse, perte'}
+          value={reason}
+          onChangeText={setReason}
+        />
+        <Button
+          title={kind === 'restock' ? 'Enregistrer l’entrée' : 'Enregistrer l’ajustement'}
+          variant="primary"
+          onPress={() => onSubmit(product, kind, qty, reason.trim() || null)}
+        />
+        <View style={{ height: SPACING.sm }} />
+        <Button title="Annuler" variant="secondary" onPress={onClose} />
+      </Card>
+    </ScrollView>
+  );
+}
+
+function ProductForm({
+  draft,
+  onClose,
+  onSubmit,
+}: {
+  draft: ProductDraft;
+  onClose: () => void;
+  onSubmit: (draft: ProductDraft) => Promise<void>;
+}) {
+  const isEdit = draft.id !== null;
+  const [d, setD] = useState<ProductDraft>(draft);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const set = (field: keyof ProductDraft) => (v: string) => setD((prev) => ({ ...prev, [field]: v }));
+  const num = (field: keyof ProductDraft) => (v: string) => set(field)(v.replace(/[^0-9]/g, ''));
+
+  const submit = () => {
+    setBusy(true);
+    setError(null);
+    onSubmit(d)
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Enregistrement impossible.'))
+      .finally(() => setBusy(false));
+  };
+
+  return (
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <View style={styles.formTitleRow}>
+        <Text style={[typo.title, { color: palette.surface, flex: 1, fontSize: 20 }]}>
+          {isEdit ? 'Modifier le produit' : 'Nouveau produit'}
+        </Text>
+        <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Fermer">
+          <X size={22} color={palette.surface} />
+        </Pressable>
+      </View>
+
+      <Card>
+        <Field label="Nom" placeholder="ex. Riz 5kg" value={d.name} onChangeText={set('name')} editable={!isEdit} />
+        <Field label="Prix achat" keyboardType="number-pad" placeholder="0" value={d.purchase_price} onChangeText={num('purchase_price')} />
+        <Field label="Prix vente" keyboardType="number-pad" placeholder="0" value={d.selling_price} onChangeText={num('selling_price')} />
+        <Field label="Seuil" keyboardType="number-pad" placeholder="0" value={d.minimum_stock} onChangeText={num('minimum_stock')} />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <Button
+          title={isEdit ? 'Enregistrer' : 'Créer le produit'}
+          variant="accent"
+          onPress={submit}
+          disabled={busy || !d.name.trim()}
+        />
+        <View style={{ height: SPACING.sm }} />
+        <Button title="Annuler" variant="secondary" onPress={onClose} />
+      </Card>
     </ScrollView>
   );
 }
@@ -174,23 +310,22 @@ export function StockScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: palette.background },
   content: { padding: SPACING.lg, paddingBottom: SPACING.xxl },
-  subtitle: { color: palette.textMuted, fontFamily: typo.body.fontFamily, marginBottom: SPACING.lg },
-  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: SPACING.md },
-  divider: { height: 1, backgroundColor: palette.border, marginVertical: SPACING.lg },
-  productRow: {
+  kpiRow: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.lg },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginTop: SPACING.md },
+  smallAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
-    backgroundColor: palette.surface,
-    borderRadius: RADIUS.card,
+    gap: SPACING.xs,
+    borderRadius: RADIUS.field,
     borderWidth: 1,
     borderColor: palette.border,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
-  iconBox: { width: 40, height: 40, borderRadius: RADIUS.field, backgroundColor: '#EDF0FB', alignItems: 'center', justifyContent: 'center' },
-  lowBadge: { backgroundColor: '#FCEBC8', borderRadius: RADIUS.field, paddingHorizontal: SPACING.sm, paddingVertical: 4 },
-  lowBadgeText: { fontFamily: typo.microLabel.fontFamily, fontSize: 11, color: palette.warning, fontWeight: '600' },
+  smallActionText: { fontFamily: typo.body.fontFamily, fontSize: 13, fontWeight: '600', color: palette.text },
+  feedHead: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.sm },
+  formTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: SPACING.md, marginBottom: SPACING.lg },
   line: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -199,28 +334,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: palette.border,
   },
-  successStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    backgroundColor: '#F1F8F4',
-    borderRadius: RADIUS.card,
-    borderWidth: 1,
-    borderColor: '#CBE6D7',
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  successText: { fontFamily: typo.muted.fontFamily, fontSize: 13, color: palette.text, flex: 1 },
-  alertStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    backgroundColor: '#FCEBC8',
-    borderRadius: RADIUS.card,
-    borderWidth: 1,
-    borderColor: '#F0D9A8',
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  alertText: { fontFamily: typo.muted.fontFamily, fontSize: 13, color: '#7A5208', flex: 1 },
+  error: { fontFamily: typo.body.fontFamily, fontSize: 13, color: palette.danger, marginBottom: SPACING.md },
 });

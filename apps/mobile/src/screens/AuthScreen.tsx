@@ -84,9 +84,9 @@ export function AuthScreen() {
               <CheckCircle2 size={22} color={palette.success} />
               <Text style={typo.heading}>Entreprise créée</Text>
             </View>
-            <Text style={typo.muted}>Note ce code et partage-le avec tes employés : il sert à se connecter.</Text>
-            <Text style={[typo.kpi, { fontSize: 40, letterSpacing: 2, marginVertical: SPACING.md }]}>{createdCode}</Text>
-            <Button title="Entrer dans l’application" variant="accent" onPress={() => void run(enterAfterRegister)} disabled={busy} />
+            <Text style={typo.muted}>Note bien ce code : c’est lui qui permet à tes employés (et à toi, sur un autre appareil) de se connecter à ton entreprise. Il est réaffiché dans le menu et sur l’écran Équipe.</Text>
+            <Text selectable style={[typo.kpi, { fontSize: 40, letterSpacing: 2, marginVertical: SPACING.md }]}>{createdCode}</Text>
+            <Button title="J’ai noté mon code — continuer" variant="accent" onPress={() => void run(enterAfterRegister)} disabled={busy} />
           </Card>
         ) : mode === 'login' ? (
           <Card style={{ marginTop: SPACING.lg }}>
@@ -103,7 +103,7 @@ export function AuthScreen() {
               onChangeText={setBusinessCode}
             />
             <Field
-              label="PIN"
+              label="Code PIN"
               placeholder="4 à 8 chiffres"
               keyboardType="number-pad"
               secureTextEntry
@@ -127,13 +127,13 @@ export function AuthScreen() {
               <User size={16} color={palette.textMuted} />
               <Text style={[typo.muted, { fontSize: 12 }]}>Toi, le propriétaire</Text>
             </View>
-            <Field label="Nom complet" placeholder="ex. Awa Ngo" value={ownerName} onChangeText={setOwnerName} />
+            <Field label="Votre nom" placeholder="ex. Awa Ngo" value={ownerName} onChangeText={setOwnerName} />
             <View style={styles.inlineIcon}>
               <Phone size={16} color={palette.textMuted} />
               <Text style={[typo.muted, { fontSize: 12 }]}>Optionnel</Text>
             </View>
-            <Field label="Téléphone" placeholder="ex. 6 90 00 00 00" keyboardType="phone-pad" value={ownerPhone} onChangeText={setOwnerPhone} />
-            <Field label="PIN (4 à 8 chiffres)" placeholder="choisis un PIN" keyboardType="number-pad" secureTextEntry maxLength={PIN_MAX} value={newPin} onChangeText={setNewPin} />
+            <Field label="Téléphone (optionnel)" placeholder="ex. 6 90 00 00 00" keyboardType="phone-pad" value={ownerPhone} onChangeText={setOwnerPhone} />
+            <Field label="Choisissez un code PIN" placeholder="4 à 8 chiffres" keyboardType="number-pad" secureTextEntry maxLength={PIN_MAX} value={newPin} onChangeText={setNewPin} />
             <Field label="Confirmer le PIN" placeholder="retape le PIN" keyboardType="number-pad" secureTextEntry maxLength={PIN_MAX} value={confirmPin} onChangeText={setConfirmPin} />
             {error ? <ErrorLine message={error} /> : null}
             <Button title="Créer l’entreprise" variant="accent" onPress={() => void doRegister()} disabled={busy} />

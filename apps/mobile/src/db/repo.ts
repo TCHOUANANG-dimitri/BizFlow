@@ -238,6 +238,26 @@ export function getCashTotal(): number {
   return base + (pending && pending.total ? pending.total : 0);
 }
 
+// Caisse attendue d'une journée civile, calculée localement (repli hors-ligne de la
+// clôture, comme le web) : mouvements du jour + ventes du jour encore en file.
+export function getExpectedCashForDateLocal(dateKey: string): number {
+  const d = getDb();
+  const userId = scopedUserId();
+  const scope = userId ? ' AND user_id = ?' : '';
+  const args = userId ? [dateKey, userId] : [dateKey];
+  const moves = d.getFirstSync<{ total: number | null }>(
+    `SELECT COALESCE(SUM(amount), 0) AS total FROM money_movements WHERE substr(created_at, 1, 10) = ?${scope}`,
+    args,
+  );
+  const pendingSales = d.getFirstSync<{ total: number | null }>(
+    `SELECT COALESCE(SUM(s.total_amount), 0) AS total
+       FROM sales s JOIN outbox o ON o.client_uuid = s.client_uuid
+      WHERE o.status = 'pending' AND o.kind = 'sale' AND substr(s.created_at, 1, 10) = ?${userId ? ' AND s.user_id = ?' : ''}`,
+    args,
+  );
+  return (moves?.total ?? 0) + (pendingSales?.total ?? 0);
+}
+
 export function getPendingOutbox(): OutboxRow[] {
   return getDb().getAllSync<OutboxRow>(
     "SELECT * FROM outbox WHERE status = 'pending' ORDER BY created_at ASC",

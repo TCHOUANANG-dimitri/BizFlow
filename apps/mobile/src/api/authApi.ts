@@ -49,3 +49,7 @@ export function createEmployee(request: {
 }): Promise<UserOut> {
   return apiFetch<UserOut>('/auth/employees', { method: 'POST', body: request });
 }
+
+export function listEmployees(): Promise<UserOut[]> {
+  return apiFetch<UserOut[]>('/auth/employees');
+}

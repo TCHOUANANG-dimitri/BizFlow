@@ -9,6 +9,7 @@ import { PAYMENT_METHODS, PaymentMethod } from '../config';
 import { palette, RADIUS, SPACING, typo } from '../theme';
 import { formatFcfa, formatTime } from '../format';
 import { Button, Card, Field, Segmented, Stepper } from '../components/ui';
+import { ScreenHeader } from '../components/shared';
 
 export function SaleScreen() {
   const { refreshKey, refresh } = useApp();
@@ -52,15 +53,15 @@ export function SaleScreen() {
   if (!selected) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={[typo.title, { color: palette.surface }]}>Nouvelle vente</Text>
-        <Text style={[typo.muted, { color: palette.textMuted, marginBottom: SPACING.lg }]}>
-          Choisis un produit : la vente met à jour ventes, caisse et stock en une seule action.
-        </Text>
+        <ScreenHeader
+          title="Vente rapide"
+          subtitle="Touchez un produit : la vente met à jour ventes, caisse et stock en un seul geste."
+        />
 
         {products.length === 0 ? (
           <Card>
             <Text style={typo.body}>
-              Le catalogue n’est pas encore disponible. Le sync doit réussir une première fois (bouton en bas de l’écran « Jour »).
+              Aucun produit disponible — ajoute des produits depuis le web.
             </Text>
           </Card>
         ) : (
@@ -71,7 +72,7 @@ export function SaleScreen() {
                 <Text style={[typo.kpi, { fontSize: 18, color: palette.primary }]}>{formatFcfa(p.selling_price)}</Text>
               </View>
               <Text style={typo.muted}>
-                Stock {p.quantity} — seuil {p.minimum_stock}
+                stock {p.quantity} · seuil {p.minimum_stock}
               </Text>
             </PressableCard>
           ))
@@ -81,7 +82,7 @@ export function SaleScreen() {
           <View style={styles.successStrip}>
             <CheckCircle2 size={20} color={palette.success} />
             <Text style={styles.successText}>
-              Vente enregistrée : {lastSale.quantity} × {formatFcfa(lastSale.unit_price)} = {formatFcfa(lastSale.total_amount)} ({lastSale.payment_method === 'cash' ? 'cash' : 'Mobile Money'})
+              Vente enregistrée hors-ligne : {lastSale.quantity} × {formatFcfa(lastSale.unit_price)} = {formatFcfa(lastSale.total_amount)} ({lastSale.payment_method === 'cash' ? 'cash' : 'Mobile Money'})
             </Text>
           </View>
         )}
@@ -101,7 +102,7 @@ export function SaleScreen() {
 
       <Card>
         <Text style={[typo.heading, { marginBottom: SPACING.xs }]}>{selected.name}</Text>
-        <Text style={typo.muted}>Stock {selected.quantity} — une vente n’est jamais bloquée pour un stock court.</Text>
+        <Text style={typo.muted}>Stock : {selected.quantity} — une vente n’est jamais bloquée pour un stock insuffisant.</Text>
       </Card>
 
       <Card>
@@ -110,7 +111,7 @@ export function SaleScreen() {
 
         <View style={styles.divider} />
 
-        <Text style={[typo.microLabel, { marginBottom: SPACING.sm }]}>Moyen de paiement</Text>
+        <Text style={[typo.microLabel, { marginBottom: SPACING.sm }]}>Paiement</Text>
         <Segmented
           options={[
             { value: 'cash', label: 'Cash' },
@@ -122,7 +123,7 @@ export function SaleScreen() {
 
         <View style={styles.divider} />
 
-        <Text style={[typo.microLabel, { marginBottom: SPACING.sm }]}>Prix (optionnel, sinon prix catalogue)</Text>
+        <Text style={[typo.microLabel, { marginBottom: SPACING.sm }]}>Prix unitaire (optionnel, sinon prix catalogue)</Text>
         <Field
           keyboardType="number-pad"
           placeholder="laisser vide = prix du produit"
@@ -135,7 +136,7 @@ export function SaleScreen() {
         <Text style={typo.microLabel}>Total à encaisser</Text>
         <Text style={[typo.kpi, { fontSize: 36, marginVertical: SPACING.sm }]}>{formatFcfa(total)}</Text>
 
-        <Button title="Encaisser" variant="accent" onPress={confirm} disabled={total <= 0 || !!lastSale} />
+        <Button title="Encaisser (hors-ligne)" variant="accent" onPress={confirm} disabled={total <= 0 || !!lastSale} />
       </Card>
 
       {lastSale && (
