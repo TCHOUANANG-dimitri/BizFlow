@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AlertTriangle from 'lucide-react-native/icons/triangle-alert';
 import CheckCircle2 from 'lucide-react-native/icons/circle-check';
-import History from 'lucide-react-native/icons/history';
+import RotateCcwClock from 'lucide-react-native/icons/rotate-ccw-clock';
 import Package from 'lucide-react-native/icons/package';
 import X from 'lucide-react-native/icons/x';
 
@@ -144,7 +144,7 @@ export function StockScreen() {
       {feed.length > 0 && (
         <Card style={{ marginTop: SPACING.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.sm }}>
-            <History size={18} color={palette.primary} />
+            <RotateCcwClock size={18} color={palette.primary} />
             <Text style={typo.microLabel}>Mouvements récents (tous employés)</Text>
           </View>
           {feed.map((m) => {
