@@ -1,0 +1,1814 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Korah Business Manager API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register-business": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_auth_register_business_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterBusinessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login Route",
+        "operationId": "login_route_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/employees": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "List Employees Route",
+        "operationId": "list_employees_route_auth_employees_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Employees Route Auth Employees Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Create Employee Route",
+        "operationId": "create_employee_route_auth_employees_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmployeeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/products": {
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Create",
+        "operationId": "create_products_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "List All",
+        "operationId": "list_all_products_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_inactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Inactive"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProductOut"
+                      }
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProductOutRestricted"
+                      }
+                    }
+                  ],
+                  "title": "Response List All Products Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{product_id}": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Get One",
+        "operationId": "get_one_products__product_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProductOut"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProductOutRestricted"
+                    }
+                  ],
+                  "title": "Response Get One Products  Product Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Update",
+        "operationId": "update_products__product_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/closing/expected-cash": {
+      "get": {
+        "tags": [
+          "closing"
+        ],
+        "summary": "Expected Cash",
+        "operationId": "expected_cash_closing_expected_cash_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "closing_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Closing Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpectedCashOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard/daily": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Daily",
+        "operationId": "daily_dashboard_daily_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "day",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/audit-log": {
+      "get": {
+        "tags": [
+          "audit"
+        ],
+        "summary": "List Audit",
+        "description": "Journal d'audit (MVP #6). R\u00e9serv\u00e9 au propri\u00e9taire \u2014 tout est trac\u00e9, rien n'est \u00e9dit\u00e9.",
+        "operationId": "list_audit_audit_log_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditLogOut"
+                  },
+                  "title": "Response List Audit Audit Log Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/push": {
+      "post": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Push",
+        "operationId": "push_sync_push_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/sync/pull": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Pull",
+        "operationId": "pull_sync_pull_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "since_sales",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since Sales"
+            }
+          },
+          {
+            "name": "since_money_movements",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since Money Movements"
+            }
+          },
+          {
+            "name": "since_stock_movements",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since Stock Movements"
+            }
+          },
+          {
+            "name": "since_daily_closings",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since Daily Closings"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuditLogOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type"
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Entity Id"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "user_full_name": {
+            "type": "string",
+            "title": "User Full Name"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "action",
+          "entity_type",
+          "entity_id",
+          "user_id",
+          "user_full_name"
+        ],
+        "title": "AuditLogOut",
+        "description": "Une ligne du journal : qui a fait quoi, quand \u2014 et sur quel objet."
+      },
+      "CreateEmployeeRequest": {
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "pin": {
+            "type": "string",
+            "maxLength": 8,
+            "minLength": 4,
+            "title": "Pin"
+          },
+          "can_view_purchase_prices": {
+            "type": "boolean",
+            "title": "Can View Purchase Prices",
+            "default": false
+          },
+          "can_view_owner_dashboard": {
+            "type": "boolean",
+            "title": "Can View Owner Dashboard",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "full_name",
+          "pin"
+        ],
+        "title": "CreateEmployeeRequest"
+      },
+      "DailyClosingIn": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "closing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Closing Date"
+          },
+          "actual_cash": {
+            "type": "integer",
+            "title": "Actual Cash"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "closing_date",
+          "actual_cash"
+        ],
+        "title": "DailyClosingIn",
+        "description": "No `expected_cash` here on purpose: it is computed server-side from recorded money\nmovements, never trusted from the client \u2014 see documentation/SYNC_DESIGN.md."
+      },
+      "DashboardOut": {
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date",
+            "title": "Day"
+          },
+          "sales_total": {
+            "type": "integer",
+            "title": "Sales Total"
+          },
+          "expense_total": {
+            "type": "integer",
+            "title": "Expense Total"
+          },
+          "income_total": {
+            "type": "integer",
+            "title": "Income Total"
+          },
+          "withdrawal_total": {
+            "type": "integer",
+            "title": "Withdrawal Total"
+          },
+          "expected_cash": {
+            "type": "integer",
+            "title": "Expected Cash"
+          },
+          "latest_closing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LatestClosingOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stock_alerts": {
+            "items": {
+              "$ref": "#/components/schemas/StockAlertOut"
+            },
+            "type": "array",
+            "title": "Stock Alerts"
+          },
+          "top_products": {
+            "items": {
+              "$ref": "#/components/schemas/TopProductOut"
+            },
+            "type": "array",
+            "title": "Top Products"
+          },
+          "employee_activity": {
+            "items": {
+              "$ref": "#/components/schemas/EmployeeActivityOut"
+            },
+            "type": "array",
+            "title": "Employee Activity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "day",
+          "sales_total",
+          "expense_total",
+          "income_total",
+          "withdrawal_total",
+          "expected_cash",
+          "latest_closing",
+          "stock_alerts",
+          "top_products",
+          "employee_activity"
+        ],
+        "title": "DashboardOut"
+      },
+      "EmployeeActivityOut": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "sales_count": {
+            "type": "integer",
+            "title": "Sales Count"
+          },
+          "sales_total": {
+            "type": "integer",
+            "title": "Sales Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "full_name",
+          "sales_count",
+          "sales_total"
+        ],
+        "title": "EmployeeActivityOut"
+      },
+      "ExpectedCashOut": {
+        "properties": {
+          "closing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Closing Date"
+          },
+          "expected_cash": {
+            "type": "integer",
+            "title": "Expected Cash"
+          },
+          "sales_total": {
+            "type": "integer",
+            "title": "Sales Total"
+          },
+          "income_total": {
+            "type": "integer",
+            "title": "Income Total"
+          },
+          "expense_total": {
+            "type": "integer",
+            "title": "Expense Total"
+          },
+          "withdrawal_total": {
+            "type": "integer",
+            "title": "Withdrawal Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "closing_date",
+          "expected_cash",
+          "sales_total",
+          "income_total",
+          "expense_total",
+          "withdrawal_total"
+        ],
+        "title": "ExpectedCashOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LatestClosingOut": {
+        "properties": {
+          "actual_cash": {
+            "type": "integer",
+            "title": "Actual Cash"
+          },
+          "expected_cash": {
+            "type": "integer",
+            "title": "Expected Cash"
+          },
+          "difference": {
+            "type": "integer",
+            "title": "Difference"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "actual_cash",
+          "expected_cash",
+          "difference",
+          "note",
+          "created_at"
+        ],
+        "title": "LatestClosingOut"
+      },
+      "LoginRequest": {
+        "properties": {
+          "business_code": {
+            "type": "string",
+            "title": "Business Code"
+          },
+          "pin": {
+            "type": "string",
+            "title": "Pin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_code",
+          "pin"
+        ],
+        "title": "LoginRequest"
+      },
+      "ManualMoneyMovementType": {
+        "type": "string",
+        "enum": [
+          "income",
+          "expense",
+          "withdrawal"
+        ],
+        "title": "ManualMoneyMovementType",
+        "description": "Excludes \"sale\": that type is only ever derived server-side from a Sale event."
+      },
+      "ManualStockMovementType": {
+        "type": "string",
+        "enum": [
+          "restock",
+          "adjustment"
+        ],
+        "title": "ManualStockMovementType",
+        "description": "Excludes \"sale\": that type is only ever derived server-side from a Sale event."
+      },
+      "MoneyMovementIn": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ManualMoneyMovementType"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "type",
+          "amount"
+        ],
+        "title": "MoneyMovementIn"
+      },
+      "ProductCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity",
+            "default": 0
+          },
+          "purchase_price": {
+            "type": "integer",
+            "title": "Purchase Price",
+            "default": 0
+          },
+          "selling_price": {
+            "type": "integer",
+            "title": "Selling Price",
+            "default": 0
+          },
+          "minimum_stock": {
+            "type": "integer",
+            "title": "Minimum Stock",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ProductCreate"
+      },
+      "ProductOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "purchase_price": {
+            "type": "integer",
+            "title": "Purchase Price"
+          },
+          "selling_price": {
+            "type": "integer",
+            "title": "Selling Price"
+          },
+          "minimum_stock": {
+            "type": "integer",
+            "title": "Minimum Stock"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "quantity",
+          "purchase_price",
+          "selling_price",
+          "minimum_stock",
+          "is_active"
+        ],
+        "title": "ProductOut",
+        "description": "Full view \u2014 owners, or employees with can_view_purchase_prices."
+      },
+      "ProductOutRestricted": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "selling_price": {
+            "type": "integer",
+            "title": "Selling Price"
+          },
+          "minimum_stock": {
+            "type": "integer",
+            "title": "Minimum Stock"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "quantity",
+          "selling_price",
+          "minimum_stock",
+          "is_active"
+        ],
+        "title": "ProductOutRestricted",
+        "description": "What a regular employee sees: no purchase price, no margin visible."
+      },
+      "ProductUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "purchase_price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Price"
+          },
+          "selling_price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selling Price"
+          },
+          "minimum_stock": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum Stock"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "ProductUpdate"
+      },
+      "PullResponse": {
+        "properties": {
+          "sales": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Sales"
+          },
+          "money_movements": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Money Movements"
+          },
+          "stock_movements": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Stock Movements"
+          },
+          "daily_closings": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Daily Closings"
+          },
+          "cursors": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Cursors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sales",
+          "money_movements",
+          "stock_movements",
+          "daily_closings",
+          "cursors"
+        ],
+        "title": "PullResponse"
+      },
+      "PushRequest": {
+        "properties": {
+          "sales": {
+            "items": {
+              "$ref": "#/components/schemas/SaleIn"
+            },
+            "type": "array",
+            "title": "Sales",
+            "default": []
+          },
+          "money_movements": {
+            "items": {
+              "$ref": "#/components/schemas/MoneyMovementIn"
+            },
+            "type": "array",
+            "title": "Money Movements",
+            "default": []
+          },
+          "stock_movements": {
+            "items": {
+              "$ref": "#/components/schemas/StockMovementIn"
+            },
+            "type": "array",
+            "title": "Stock Movements",
+            "default": []
+          },
+          "daily_closings": {
+            "items": {
+              "$ref": "#/components/schemas/DailyClosingIn"
+            },
+            "type": "array",
+            "title": "Daily Closings",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "PushRequest"
+      },
+      "PushResponse": {
+        "properties": {
+          "sales": {
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            },
+            "type": "array",
+            "title": "Sales",
+            "default": []
+          },
+          "money_movements": {
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            },
+            "type": "array",
+            "title": "Money Movements",
+            "default": []
+          },
+          "stock_movements": {
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            },
+            "type": "array",
+            "title": "Stock Movements",
+            "default": []
+          },
+          "daily_closings": {
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            },
+            "type": "array",
+            "title": "Daily Closings",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "PushResponse"
+      },
+      "PushResult": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "status"
+        ],
+        "title": "PushResult"
+      },
+      "RegisterBusinessRequest": {
+        "properties": {
+          "business_name": {
+            "type": "string",
+            "title": "Business Name"
+          },
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          },
+          "owner_full_name": {
+            "type": "string",
+            "title": "Owner Full Name"
+          },
+          "owner_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Phone"
+          },
+          "pin": {
+            "type": "string",
+            "maxLength": 8,
+            "minLength": 4,
+            "title": "Pin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_name",
+          "owner_full_name",
+          "pin"
+        ],
+        "title": "RegisterBusinessRequest"
+      },
+      "SaleIn": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "unit_price": {
+            "type": "integer",
+            "title": "Unit Price"
+          },
+          "payment_method": {
+            "type": "string",
+            "title": "Payment Method"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "product_id",
+          "quantity",
+          "unit_price",
+          "payment_method"
+        ],
+        "title": "SaleIn"
+      },
+      "StockAlertOut": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "minimum_stock": {
+            "type": "integer",
+            "title": "Minimum Stock"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "quantity",
+          "minimum_stock"
+        ],
+        "title": "StockAlertOut"
+      },
+      "StockMovementIn": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ManualStockMovementType"
+          },
+          "quantity_delta": {
+            "type": "integer",
+            "title": "Quantity Delta"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "product_id",
+          "type",
+          "quantity_delta"
+        ],
+        "title": "StockMovementIn"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "business_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Id"
+          },
+          "business_code": {
+            "type": "string",
+            "title": "Business Code"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "can_view_purchase_prices": {
+            "type": "boolean",
+            "title": "Can View Purchase Prices"
+          },
+          "can_view_owner_dashboard": {
+            "type": "boolean",
+            "title": "Can View Owner Dashboard"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "user_id",
+          "business_id",
+          "business_code",
+          "role",
+          "full_name",
+          "can_view_purchase_prices",
+          "can_view_owner_dashboard"
+        ],
+        "title": "TokenResponse"
+      },
+      "TopProductOut": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity_sold": {
+            "type": "integer",
+            "title": "Quantity Sold"
+          },
+          "revenue": {
+            "type": "integer",
+            "title": "Revenue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "quantity_sold",
+          "revenue"
+        ],
+        "title": "TopProductOut"
+      },
+      "UserOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "business_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "can_view_purchase_prices": {
+            "type": "boolean",
+            "title": "Can View Purchase Prices"
+          },
+          "can_view_owner_dashboard": {
+            "type": "boolean",
+            "title": "Can View Owner Dashboard"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "business_id",
+          "full_name",
+          "phone",
+          "role",
+          "can_view_purchase_prices",
+          "can_view_owner_dashboard",
+          "is_active"
+        ],
+        "title": "UserOut"
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "owner",
+          "employee"
+        ],
+        "title": "UserRole"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+# node
+/node_modules
+
+# tauri / rust
+/src-tauri/target
+/src-tauri/gen

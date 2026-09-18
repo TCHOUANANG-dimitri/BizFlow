@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-[#F7F7F8] text-text;
+    font-family: var(--font-inter), sans-serif;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-manrope), sans-serif;
+    font-weight: 800;
+  }
+}
+
+@layer components {
+  /* Une carte = une idée (DESIGN_SYSTEM.md §4). */
+  .kpi-card {
+    @apply rounded-card border border-border bg-surface p-4;
+  }
+  .kpi-label {
+    @apply text-xs font-medium uppercase tracking-wide text-text-muted;
+  }
+  .kpi-value {
+    @apply mt-1 font-heading text-2xl font-bold;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-field bg-background px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-field bg-accent px-4 py-3 text-sm font-semibold text-background transition hover:opacity-90 disabled:opacity-40;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-field border border-border bg-surface px-4 py-3 text-sm font-semibold text-text transition hover:bg-[#F3F4F6] disabled:opacity-40;
+  }
+
+  .field-label {
+    @apply mb-1 block text-xs font-medium uppercase tracking-wide text-text-muted;
+  }
+  .field-input {
+    @apply block w-full rounded-field border border-border bg-surface px-3 py-2.5 text-sm text-text outline-none focus:border-focus focus:ring-1 focus:ring-focus;
+  }
+
+  /* Badges de statut — texte + couleur, jamais la couleur seule (accessibilité). */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .badge-primary {
+    @apply bg-primary/10 text-primary;
+  }
+  .badge-warning {
+    @apply bg-warning/10 text-warning;
+  }
+  .badge-danger {
+    @apply bg-danger/10 text-danger;
+  }
+  .badge-success {
+    @apply bg-success/10 text-success;
+  }
+}

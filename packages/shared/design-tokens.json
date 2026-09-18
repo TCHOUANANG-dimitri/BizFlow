@@ -1,0 +1,38 @@
+{
+  "brand": {
+    "name": "BizFlow",
+    "tagline": "Votre activité, sous contrôle",
+    "taglinesSecondary": ["Enregistrer · Suivre · Décider", "Plus de visibilité. Moins de pertes."]
+  },
+  "color": {
+    "background": "#0B0B0D",
+    "surface": "#FFFFFF",
+    "text": "#1F2937",
+    "textMuted": "#6B7280",
+    "accent": "#D4A017",
+    "accentLight": "#F5C95A",
+    "primary": "#1737A6",
+    "focus": "#2563EB",
+    "success": "#16A34A",
+    "warning": "#D97706",
+    "danger": "#DC2626",
+    "border": "#E4E7EC"
+  },
+  "radius": {
+    "field": 8,
+    "card": 12,
+    "block": 16
+  },
+  "spacing": [4, 8, 12, 16, 24, 32],
+  "font": {
+    "heading": { "family": "Manrope", "weight": 800 },
+    "body": { "family": "Inter", "weight": 400 },
+    "kpi": { "family": "Manrope", "weight": 700 },
+    "microLabel": { "family": "Inter", "weight": 500, "letterSpacing": "0.04em", "case": "uppercase" }
+  },
+  "icon": {
+    "library": "lucide",
+    "style": "outline",
+    "sizeRange": [20, 24]
+  }
+}
