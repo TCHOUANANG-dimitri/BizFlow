@@ -18,6 +18,7 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://tauri.localhost",
         "tauri://localhost",
+        "https://biz-flow-theta.vercel.app",
     ]
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
