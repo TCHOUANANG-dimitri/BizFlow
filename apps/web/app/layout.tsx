@@ -10,6 +10,11 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variabl
 export const metadata: Metadata = {
   title: 'BizFlow',
   description: 'Votre activité, sous contrôle — ventes, caisse, stock au quotidien.',
+  // Favicon canonique : bizflow-icon.png depuis packages/shared/brand (copié
+  // dans public/brand par scripts/sync-brand.mjs — jamais dupliqué à la main).
+  icons: {
+    icon: '/brand/bizflow-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

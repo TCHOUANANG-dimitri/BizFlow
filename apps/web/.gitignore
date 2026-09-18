@@ -15,3 +15,6 @@ yarn-debug.*
 
 # generated from packages/shared/brand — do not edit or commit, see scripts/sync-brand.mjs
 /public/brand
+
+# typescript incremental build info
+*.tsbuildinfo
